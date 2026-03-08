@@ -1,6 +1,6 @@
 {
   "name": "outx-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for OutX — LinkedIn social listening & data API",
   "main": "dist/index.js",
   "bin": {
