@@ -239,6 +239,10 @@ OUTX_API_KEY=your-key npm run dev
 - [Pricing](https://outx.ai/docs/documentation/pricing-and-subscription) — Free, Pro, and Enterprise plans
 - [FAQ](https://outx.ai/docs/resources/faq) — Common questions answered
 
+## Partnerships
+
+Interested in a collaboration or affiliate partnership? Drop us a message at [support@outx.ai](mailto:support@outx.ai).
+
 ## License
 
 MIT
