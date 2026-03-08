@@ -202,15 +202,42 @@ For development with auto-reload:
 OUTX_API_KEY=your-key npm run dev
 ```
 
+## Documentation
+
+- [MCP Integration Guide](https://outx.ai/docs/integrations/mcp) — Detailed setup and configuration
+- [API Reference](https://outx.ai/docs/api-reference/introduction) — Full REST API documentation
+- [API Quick Start](https://outx.ai/docs/api-reference/quickstart) — Create watchlists and retrieve posts
+- [LinkedIn Data API Quick Start](https://outx.ai/docs/linkedin-api/quickstart) — Fetch profiles in 2 minutes
+- [Authentication Guide](https://outx.ai/docs/api-reference/authentication) — API keys and OTP auth
+- [Rate Limits](https://outx.ai/docs/api-reference/rate-limits) — Usage limits and best practices
+- [API Use Cases](https://outx.ai/docs/api-reference/use-cases) — Sales signals, competitor monitoring, hiring alerts
+- [Chrome Extension](https://outx.ai/docs/resources/chrome-extension) — Required for LinkedIn Data tools
+- [LinkedIn Safety Guide](https://outx.ai/docs/resources/linkedin-safety) — Rate limiting and account protection
+
+## Integrations
+
+- [Python SDK](https://outx.ai/docs/integrations/python-sdk) — Drop-in Python wrapper for the OutX API
+- [LangChain Integration](https://outx.ai/docs/integrations/langchain) — Use OutX as a LangChain tool for AI agents
+- [n8n Integration](https://outx.ai/docs/integrations/n8n) — No-code LinkedIn automation workflows
+
+## Guides & Tutorials
+
+- [How to Connect AI Agents to LinkedIn](https://www.outx.ai/blog/linkedin-api-for-ai-agents) — LangChain, Claude, GPT, and MCP examples
+- [LinkedIn API Guide](https://www.outx.ai/blog/linkedin-api-guide) — Comprehensive API overview
+- [LinkedIn API Alternatives 2026](https://www.outx.ai/blog/linkedin-api-alternatives-2026) — OutX vs Proxycurl vs PhantomBuster vs Unipile
+- [How to Build a Sales Signal Pipeline](https://www.outx.ai/blog/linkedin-sales-signal-pipeline) — Detect buying intent with the OutX API
+- [LinkedIn Competitor Monitoring Guide](https://www.outx.ai/blog/linkedin-competitor-monitoring-guide) — Track competitor activity via API
+- [Social Listening on LinkedIn](https://www.outx.ai/blog/guide-social-listening-linkedin) — Complete guide to LinkedIn monitoring
+- [How to Automate LinkedIn Likes & Comments](https://www.outx.ai/blog/automate-linkedin-likes-comments) — Engagement automation best practices
+- [LinkedIn Automation Safety Guide](https://www.outx.ai/blog/linkedin-automation-safety-guide-best-practices-2026) — Keep your account safe
+
 ## Links
 
 - [OutX Platform](https://outx.ai) — Sign up and get started
-- [API Documentation](https://outx.ai/docs/api-reference/introduction) — Full API reference
-- [MCP Integration Guide](https://outx.ai/docs/integrations/mcp) — Detailed setup docs
-- [Get API Key](https://mentions.outx.ai/api-doc) — Generate your key
-- [Chrome Extension](https://outx.ai/docs/resources/chrome-extension) — Required for LinkedIn Data tools
-- [Python SDK](https://outx.ai/docs/integrations/python-sdk) — Python wrapper for the API
-- [LangChain Integration](https://outx.ai/docs/integrations/langchain) — Use OutX as a LangChain tool
+- [Get API Key](https://mentions.outx.ai/api-doc) — Generate your API key
+- [OutX for AI Agents](https://outx.ai/docs/ai) — All AI integration options (MCP, skill file, llms.txt)
+- [Pricing](https://outx.ai/docs/documentation/pricing-and-subscription) — Free, Pro, and Enterprise plans
+- [FAQ](https://outx.ai/docs/resources/faq) — Common questions answered
 
 ## License
 
