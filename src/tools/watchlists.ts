@@ -98,6 +98,49 @@ export function registerWatchlistTools(
     }
   );
 
+  server.tool(
+    "create_keyword_watchlist_by_prompt",
+    "Create a keyword watchlist from a natural-language prompt. OutX generates optimized keywords and intent labels automatically using AI. The watchlist is created immediately; keyword generation runs in the background.",
+    {
+      prompt: z
+        .string()
+        .describe(
+          "Plain English description of what to track (e.g. 'People looking for remote software engineering jobs'). Can include URLs for better keyword quality."
+        ),
+      name: z.string().optional().describe("Watchlist name (auto-generated if omitted)"),
+      fetchFreqInHours: fetchFreqEnum.optional(),
+    },
+    async (params) => {
+      const body: Record<string, unknown> = { prompt: params.prompt };
+      if (params.name) body.name = params.name;
+      if (params.fetchFreqInHours)
+        body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
+
+      const result = await client.post("/api-keyword-watchlist-prompt", body);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.tool(
+    "update_keyword_watchlist_prompt",
+    "Update the prompt on an existing keyword watchlist. OutX replaces all keywords and intent labels with freshly generated ones based on the new prompt. Regeneration runs in the background.",
+    {
+      id: z.string().describe("Watchlist ID to update"),
+      prompt: z
+        .string()
+        .describe("New natural-language prompt. OutX will regenerate keywords and labels from this."),
+    },
+    async (params) => {
+      const body: Record<string, unknown> = {
+        id: params.id,
+        prompt: params.prompt,
+      };
+
+      const result = await client.put("/api-keyword-watchlist-prompt", body);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
   // ── People Watchlists ───────────────────────────────────
 
   server.tool(

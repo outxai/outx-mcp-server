@@ -107,15 +107,17 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 > "Create a watchlist to monitor LinkedIn posts about AI startups raising Series A"
 
-## Available Tools (20)
+## Available Tools (23)
 
 ### Watchlist Management
 
 | Tool | Description |
 |------|-------------|
 | `create_keyword_watchlist` | Monitor LinkedIn posts matching keywords with optional required/excluded terms |
+| `create_keyword_watchlist_by_prompt` | Create a keyword watchlist from a natural-language prompt (AI generates keywords and labels) |
 | `list_keyword_watchlists` | List all keyword watchlists |
 | `update_keyword_watchlist` | Update name, scan frequency, or pause/resume |
+| `update_keyword_watchlist_prompt` | Update the prompt on an existing watchlist (regenerates all keywords and labels) |
 | `delete_keyword_watchlist` | Delete a keyword watchlist and all tracked data |
 | `create_people_watchlist` | Track posts from specific LinkedIn profiles |
 | `list_people_watchlists` | List all people watchlists |
@@ -131,6 +133,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 | Tool | Description |
 |------|-------------|
 | `get_posts` | Search and filter posts from watchlists (keyword, date, seniority, trending, language, etc.) |
+| `get_interactions` | Retrieve likes and comments for posts in a watchlist with filtering, pagination, and daily graph data |
 | `like_post` | Like a post from your watchlist results |
 | `comment_on_post` | Comment on a post from your watchlist results |
 

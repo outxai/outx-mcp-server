@@ -7,6 +7,36 @@ export function registerEngagementTools(
   client: OutxClient
 ): void {
   server.tool(
+    "get_interactions",
+    "Retrieve likes and comments for posts in a specific watchlist. Use to analyze engagement activity, build reports, or power dashboards. Returns interactions with full post objects, pagination with like/comment totals, and a 7-day graph.",
+    {
+      watchlist_id: z.string().describe("Watchlist ID to retrieve interactions from"),
+      interaction_type: z
+        .enum(["like", "comment"])
+        .optional()
+        .describe("Filter by interaction type"),
+      actor_ids: z
+        .string()
+        .optional()
+        .describe("Comma-separated actor IDs (user IDs, author IDs, or company IDs)"),
+      page: z.string().optional().describe("Page number (default: 1)"),
+      page_size: z.string().optional().describe("Results per page, max 100 (default: 10)"),
+    },
+    async (params) => {
+      const queryParams: Record<string, string> = {
+        watchlist_id: params.watchlist_id,
+      };
+      if (params.interaction_type) queryParams.interaction_type = params.interaction_type;
+      if (params.actor_ids) queryParams.actor_ids = params.actor_ids;
+      if (params.page) queryParams.page = params.page;
+      if (params.page_size) queryParams.page_size = params.page_size;
+
+      const result = await client.get("/api-interactions", queryParams);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.tool(
     "like_post",
     "Like a LinkedIn post from your watchlist. Requires the post ID from get_posts results.",
     {
