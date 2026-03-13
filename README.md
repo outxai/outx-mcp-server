@@ -13,7 +13,9 @@ MCP server for the [OutX](https://outx.ai) LinkedIn social listening and data AP
 
 - **Monitor LinkedIn** — Track posts by keywords, people, or companies with watchlists
 - **Search & filter posts** — 15+ filters: keyword, date, seniority, trending, language
-- **Fetch profiles** — Get full LinkedIn profiles: name, headline, experience, education, skills
+- **Fetch profiles & companies** — Get full LinkedIn profiles, company pages, and connections
+- **Search LinkedIn** — Find people by title, company, location, industry, and more
+- **Message connections** — Send direct messages to 1st-degree connections
 - **Engage** — Like and comment on posts through your LinkedIn account
 - **All via natural language** — Just tell your AI agent what you want
 
@@ -107,7 +109,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 > "Create a watchlist to monitor LinkedIn posts about AI startups raising Series A"
 
-## Available Tools (23)
+## Available Tools (28)
 
 ### Watchlist Management
 
@@ -145,6 +147,11 @@ These tools use the async LinkedIn Data API. The MCP server handles polling auto
 |------|-------------|
 | `fetch_linkedin_profile` | Fetch full LinkedIn profile by slug (name, headline, experience, education, skills) |
 | `fetch_linkedin_posts` | Fetch recent posts from profiles by URN |
+| `fetch_linkedin_company` | Fetch company page data by slug (industry, employee count, description, headquarters) |
+| `fetch_linkedin_company_posts` | Fetch recent posts from a company page with engagement data |
+| `linkedin_send_message` | Send a direct message to a 1st-degree connection |
+| `linkedin_search_profiles` | Search LinkedIn profiles by title, company, location, industry, and more |
+| `linkedin_fetch_connections` | Fetch your 1st-degree connections with keyword search and pagination |
 | `linkedin_like_post` | Like a post by activity URN |
 | `linkedin_comment_on_post` | Comment on a post by activity URN |
 | `get_task_status` | Check status of an async task manually |
@@ -161,13 +168,17 @@ Once connected, try these with your AI agent:
 - "What are VPs and Directors posting about machine learning?"
 - "Find posts mentioning our competitor from the last 7 days"
 
-**Profile research:**
+**Profile & company research:**
 - "Fetch the LinkedIn profile for williamhgates"
 - "Get recent posts from this prospect's profile"
+- "Get company info and recent posts for OpenAI"
+- "Search for VPs of Engineering at Google in the US"
+- "Show me my most recently added connections"
 
-**Engagement:**
+**Engagement & messaging:**
 - "Like the top 3 most engaging posts about product management"
 - "Comment on this post with a thoughtful response"
+- "Send a message to this connection thanking them for connecting"
 
 **Workflows:**
 - "Set up a watchlist for 'looking for a CRM' and check it every 6 hours"
@@ -187,7 +198,7 @@ The OutX API has two surfaces:
 
 2. **LinkedIn Data API** (async) — Direct LinkedIn proxy. Fetch profiles, get posts, like, comment. All endpoints return a task ID; the MCP server polls automatically until the result is ready.
 
-The MCP server wraps both APIs into 20 tools that any MCP-compatible AI agent can call.
+The MCP server wraps both APIs into 28 tools that any MCP-compatible AI agent can call.
 
 ## Development
 
