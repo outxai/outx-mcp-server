@@ -65,19 +65,56 @@ export function registerWatchlistTools(
 
   server.tool(
     "update_keyword_watchlist",
-    "Update a keyword watchlist's name, frequency, or status.",
+    "Update a keyword watchlist. Can change name, fetch frequency, Slack webhook, pause/resume tracking via `disable`, and replace the tracked keywords or labels.",
     {
       id: z.string().describe("Watchlist ID"),
       name: z.string().optional(),
       fetchFreqInHours: fetchFreqEnum.optional(),
-      status: z.enum(["active", "paused"]).optional(),
+      disable: z
+        .boolean()
+        .optional()
+        .describe("Set to true to pause tracking, false to resume"),
+      slack_webhook_url: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("Slack incoming webhook URL for alerts. Pass null to clear."),
+      keywords: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Replace tracked keywords. All existing keywords are removed and these are inserted."
+        ),
+      required_keywords: z
+        .array(z.string())
+        .optional()
+        .describe("Applied to every keyword above. Posts MUST contain at least one."),
+      exclude_keywords: z
+        .array(z.string())
+        .optional()
+        .describe("Applied to every keyword above. Posts containing any are excluded."),
+      labels: z
+        .array(z.string())
+        .optional()
+        .describe("Replace label set used to categorize matched posts."),
     },
     async (params) => {
       const body: Record<string, unknown> = { id: params.id };
       if (params.name) body.name = params.name;
       if (params.fetchFreqInHours)
         body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
-      if (params.status) body.status = params.status;
+      if (params.disable !== undefined) body.disable = params.disable;
+      if (params.slack_webhook_url !== undefined)
+        body.slack_webhook_url = params.slack_webhook_url;
+      if (params.keywords) {
+        body.keywords = params.keywords.map((kw) => {
+          const obj: Record<string, unknown> = { keyword: kw };
+          if (params.required_keywords) obj.required_keywords = params.required_keywords;
+          if (params.exclude_keywords) obj.exclude_keywords = params.exclude_keywords;
+          return obj;
+        });
+      }
+      if (params.labels) body.labels = params.labels;
 
       const result = await client.put("/api-keyword-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
@@ -99,8 +136,8 @@ export function registerWatchlistTools(
   );
 
   server.tool(
-    "create_keyword_watchlist_by_prompt",
-    "Create a keyword watchlist from a natural-language prompt. OutX generates optimized keywords and intent labels automatically using AI. The watchlist is created immediately; keyword generation runs in the background.",
+    "create_keyword_watchlist_from_prompt",
+    "Create a keyword watchlist from a natural-language prompt. OutX generates optimized keywords and intent labels automatically using AI. The watchlist is created immediately; keyword generation runs in the background. Hits the same endpoint as create_keyword_watchlist with a different body shape (prompt instead of keywords).",
     {
       prompt: z
         .string()
@@ -116,14 +153,14 @@ export function registerWatchlistTools(
       if (params.fetchFreqInHours)
         body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
 
-      const result = await client.post("/api-keyword-watchlist-prompt", body);
+      const result = await client.post("/api-keyword-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
     }
   );
 
   server.tool(
-    "update_keyword_watchlist_prompt",
-    "Update the prompt on an existing keyword watchlist. OutX replaces all keywords and intent labels with freshly generated ones based on the new prompt. Regeneration runs in the background.",
+    "regenerate_keyword_watchlist_from_prompt",
+    "Replace the prompt on an existing keyword watchlist. OutX wipes the current keywords and labels and regenerates them from the new prompt. Regeneration runs in the background. Hits the same endpoint as update_keyword_watchlist with a prompt body.",
     {
       id: z.string().describe("Watchlist ID to update"),
       prompt: z
@@ -136,7 +173,7 @@ export function registerWatchlistTools(
         prompt: params.prompt,
       };
 
-      const result = await client.put("/api-keyword-watchlist-prompt", body);
+      const result = await client.put("/api-keyword-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
     }
   );
@@ -181,19 +218,29 @@ export function registerWatchlistTools(
 
   server.tool(
     "update_people_watchlist",
-    "Update a people watchlist's name, frequency, or status.",
+    "Update a people watchlist. Can change name, fetch frequency, Slack webhook, and pause/resume tracking via `disable`.",
     {
       id: z.string().describe("Watchlist ID"),
       name: z.string().optional(),
       fetchFreqInHours: fetchFreqEnum.optional(),
-      status: z.enum(["active", "paused"]).optional(),
+      disable: z
+        .boolean()
+        .optional()
+        .describe("Set to true to pause tracking, false to resume"),
+      slack_webhook_url: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("Slack incoming webhook URL for alerts. Pass null to clear."),
     },
     async (params) => {
       const body: Record<string, unknown> = { id: params.id };
       if (params.name) body.name = params.name;
       if (params.fetchFreqInHours)
         body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
-      if (params.status) body.status = params.status;
+      if (params.disable !== undefined) body.disable = params.disable;
+      if (params.slack_webhook_url !== undefined)
+        body.slack_webhook_url = params.slack_webhook_url;
 
       const result = await client.put("/api-people-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
@@ -254,19 +301,29 @@ export function registerWatchlistTools(
 
   server.tool(
     "update_company_watchlist",
-    "Update a company watchlist's name, frequency, or status.",
+    "Update a company watchlist. Can change name, fetch frequency, Slack webhook, and pause/resume tracking via `disable`.",
     {
       id: z.string().describe("Watchlist ID"),
       name: z.string().optional(),
       fetchFreqInHours: fetchFreqEnum.optional(),
-      status: z.enum(["active", "paused"]).optional(),
+      disable: z
+        .boolean()
+        .optional()
+        .describe("Set to true to pause tracking, false to resume"),
+      slack_webhook_url: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("Slack incoming webhook URL for alerts. Pass null to clear."),
     },
     async (params) => {
       const body: Record<string, unknown> = { id: params.id };
       if (params.name) body.name = params.name;
       if (params.fetchFreqInHours)
         body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
-      if (params.status) body.status = params.status;
+      if (params.disable !== undefined) body.disable = params.disable;
+      if (params.slack_webhook_url !== undefined)
+        body.slack_webhook_url = params.slack_webhook_url;
 
       const result = await client.put("/api-company-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
