@@ -113,22 +113,24 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 ### Watchlist Management
 
+Pause and resume any watchlist with `disable: true` or `disable: false` on its update tool. Configure Slack alerts with `slack_webhook_url`.
+
 | Tool | Description |
 |------|-------------|
-| `create_keyword_watchlist` | Monitor LinkedIn posts matching keywords with optional required/excluded terms |
-| `create_keyword_watchlist_by_prompt` | Create a keyword watchlist from a natural-language prompt (AI generates keywords and labels) |
-| `list_keyword_watchlists` | List all keyword watchlists |
-| `update_keyword_watchlist` | Update name, scan frequency, or pause/resume |
-| `update_keyword_watchlist_prompt` | Update the prompt on an existing watchlist (regenerates all keywords and labels) |
-| `delete_keyword_watchlist` | Delete a keyword watchlist and all tracked data |
-| `create_people_watchlist` | Track posts from specific LinkedIn profiles |
-| `list_people_watchlists` | List all people watchlists |
-| `update_people_watchlist` | Update name, scan frequency, or pause/resume |
-| `delete_people_watchlist` | Delete a people watchlist |
-| `create_company_watchlist` | Monitor posts from LinkedIn company pages |
-| `list_company_watchlists` | List all company watchlists |
-| `update_company_watchlist` | Update name, scan frequency, or pause/resume |
-| `delete_company_watchlist` | Delete a company watchlist |
+| `create_keyword_watchlist` | Create a watchlist that monitors LinkedIn posts matching specific keywords. Supports optional `required_keywords` and `exclude_keywords` per keyword for fine-grained filtering. |
+| `create_keyword_watchlist_from_prompt` | Create a keyword watchlist from a plain-English prompt. OutX generates keywords and intent labels via AI in the background. Useful when you do not want to hand-pick keywords. |
+| `list_keyword_watchlists` | List all keyword watchlists on your account. |
+| `update_keyword_watchlist` | Patch any field on a keyword watchlist: `name`, `fetchFreqInHours`, `disable` (pause/resume), `slack_webhook_url`, `keywords` (replace tracked keywords), or `labels` (replace category labels). Send only the fields you want to change. |
+| `regenerate_keyword_watchlist_from_prompt` | Replace the prompt on an existing watchlist. OutX wipes the current keywords and labels and regenerates them from the new prompt in the background. |
+| `delete_keyword_watchlist` | Delete a keyword watchlist and all tracked data. |
+| `create_people_watchlist` | Create a watchlist that tracks posts from specific LinkedIn profiles by URL or slug. |
+| `list_people_watchlists` | List all people watchlists on your account. |
+| `update_people_watchlist` | Patch a people watchlist: `name`, `fetchFreqInHours`, `disable` (pause/resume), or `slack_webhook_url`. |
+| `delete_people_watchlist` | Delete a people watchlist. |
+| `create_company_watchlist` | Create a watchlist that tracks posts from LinkedIn company pages by URL or slug. |
+| `list_company_watchlists` | List all company watchlists on your account. |
+| `update_company_watchlist` | Patch a company watchlist: `name`, `fetchFreqInHours`, `disable` (pause/resume), or `slack_webhook_url`. |
+| `delete_company_watchlist` | Delete a company watchlist. |
 
 ### Posts & Engagement
 

@@ -21,7 +21,7 @@ const client = new OutxClient(apiKey);
 
 const server = new McpServer({
   name: "outx",
-  version: "1.2.0",
+  version: "1.2.1",
 });
 
 registerWatchlistTools(server, client);
