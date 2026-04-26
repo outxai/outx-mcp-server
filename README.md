@@ -109,7 +109,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 > "Create a watchlist to monitor LinkedIn posts about AI startups raising Series A"
 
-## Available Tools (28)
+## Available Tools (26)
 
 ### Watchlist Management
 
@@ -117,11 +117,9 @@ Pause and resume any watchlist with `disable: true` or `disable: false` on its u
 
 | Tool | Description |
 |------|-------------|
-| `create_keyword_watchlist` | Create a watchlist that monitors LinkedIn posts matching specific keywords. Supports optional `required_keywords` and `exclude_keywords` per keyword for fine-grained filtering. |
-| `create_keyword_watchlist_from_prompt` | Create a keyword watchlist from a plain-English prompt. OutX generates keywords and intent labels via AI in the background. Useful when you do not want to hand-pick keywords. |
+| `create_keyword_watchlist` | Create a watchlist that monitors LinkedIn posts matching keywords. Two modes: pass `keywords` to track exact terms, OR pass a plain-English `prompt` and OutX will generate keywords and intent labels for you. Mutually exclusive. |
 | `list_keyword_watchlists` | List all keyword watchlists on your account. |
-| `update_keyword_watchlist` | Patch any field on a keyword watchlist: `name`, `fetchFreqInHours`, `disable` (pause/resume), `slack_webhook_url`, `keywords` (replace tracked keywords), or `labels` (replace category labels). Send only the fields you want to change. |
-| `regenerate_keyword_watchlist_from_prompt` | Replace the prompt on an existing watchlist. OutX wipes the current keywords and labels and regenerates them from the new prompt in the background. |
+| `update_keyword_watchlist` | Patch any combination of `name`, `fetchFreqInHours`, `disable` (pause/resume), `slack_webhook_url`, `keywords`, or `labels`, OR pass `prompt` to have OutX wipe and regenerate keywords + labels from a new description. Patch and prompt modes are mutually exclusive. |
 | `delete_keyword_watchlist` | Delete a keyword watchlist and all tracked data. |
 | `create_people_watchlist` | Create a watchlist that tracks posts from specific LinkedIn profiles by URL or slug. |
 | `list_people_watchlists` | List all people watchlists on your account. |
@@ -132,31 +130,31 @@ Pause and resume any watchlist with `disable: true` or `disable: false` on its u
 | `update_company_watchlist` | Patch a company watchlist: `name`, `fetchFreqInHours`, `disable` (pause/resume), or `slack_webhook_url`. |
 | `delete_company_watchlist` | Delete a company watchlist. |
 
-### Posts & Engagement
+### Posts & Engagement (operates on posts your watchlists captured)
 
 | Tool | Description |
 |------|-------------|
-| `get_posts` | Search and filter posts from watchlists (keyword, date, seniority, trending, language, etc.) |
-| `get_interactions` | Retrieve likes and comments for posts in a watchlist with filtering, pagination, and daily graph data |
-| `like_post` | Like a post from your watchlist results |
-| `comment_on_post` | Comment on a post from your watchlist results |
+| `get_posts` | Search and filter posts from your watchlists (keyword, date, seniority, trending, language, etc.) |
+| `get_interactions` | Retrieve likes and comments for posts in a watchlist with filtering, pagination, and daily graph data. |
+| `like_watchlist_post` | Like a post by its OutX `post_id` (from `get_posts` results). For liking by LinkedIn activity URN, use `like_linkedin_post`. |
+| `comment_on_watchlist_post` | Comment on a post by its OutX `post_id` (from `get_posts` results). For commenting by LinkedIn activity URN, use `comment_on_linkedin_post`. |
 
-### LinkedIn Data API
+### LinkedIn Data API (direct LinkedIn actions, no watchlist required)
 
-These tools use the async LinkedIn Data API. The MCP server handles polling automatically — you get the result directly.
+Async tools, the MCP server polls LinkedIn for ~150s and returns the result directly. You almost never need `get_task_status` because of this.
 
 | Tool | Description |
 |------|-------------|
-| `fetch_linkedin_profile` | Fetch full LinkedIn profile by slug (name, headline, experience, education, skills) |
-| `fetch_linkedin_posts` | Fetch recent posts from profiles by URN |
-| `fetch_linkedin_company` | Fetch company page data by slug (industry, employee count, description, headquarters) |
-| `fetch_linkedin_company_posts` | Fetch recent posts from a company page with engagement data |
-| `linkedin_send_message` | Send a direct message to a 1st-degree connection |
-| `linkedin_search_profiles` | Search LinkedIn profiles by title, company, location, industry, and more |
-| `linkedin_fetch_connections` | Fetch your 1st-degree connections with keyword search and pagination |
-| `linkedin_like_post` | Like a post by activity URN |
-| `linkedin_comment_on_post` | Comment on a post by activity URN |
-| `get_task_status` | Check status of an async task manually |
+| `fetch_linkedin_profile` | Fetch full LinkedIn profile by slug (name, headline, experience, education, skills). |
+| `fetch_linkedin_profile_posts` | Fetch recent posts from one or more profiles by URN. |
+| `fetch_linkedin_company` | Fetch company page data by slug (industry, employee count, description, headquarters). |
+| `fetch_linkedin_company_posts` | Fetch recent posts from a company page with engagement data. |
+| `fetch_linkedin_connections` | Fetch your 1st-degree connections with keyword search and pagination. |
+| `search_linkedin_profiles` | Search LinkedIn profiles by title, company, location, industry, and more. |
+| `send_linkedin_message` | Send a direct message to a 1st-degree connection by recipient URN. |
+| `like_linkedin_post` | Like a post by its LinkedIn activity URN. For liking a post that came from a watchlist, use `like_watchlist_post`. |
+| `comment_on_linkedin_post` | Comment on a post by its LinkedIn activity URN. For commenting on a post that came from a watchlist, use `comment_on_watchlist_post`. |
+| `get_task_status` | Recovery only. Use this when another tool returns a "did not complete within 150s" error, pass the `api_agent_task_id` from that error to check whether the task has since finished. Don't retry the original tool, that creates a duplicate and wastes a daily quota slot. |
 
 > **Note:** LinkedIn Data tools require the [OutX Chrome extension](https://outx.ai/docs/resources/chrome-extension) to be active within the last 48 hours.
 

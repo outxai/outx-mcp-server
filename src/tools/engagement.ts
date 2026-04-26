@@ -37,10 +37,10 @@ export function registerEngagementTools(
   );
 
   server.tool(
-    "like_post",
-    "Like a LinkedIn post from your watchlist. Requires the post ID from get_posts results.",
+    "like_watchlist_post",
+    "Like a LinkedIn post that came from one of your OutX watchlists. Takes an OutX `post_id` (from `get_posts` results). To like a post by its LinkedIn activity URN directly without a watchlist, use `like_linkedin_post` instead.",
     {
-      post_id: z.string().describe("Post ID from get_posts results"),
+      post_id: z.string().describe("OutX post ID, from get_posts results"),
       user_email: z.string().describe("Email of the LinkedIn account to like from"),
       actor_type: z
         .enum(["user", "company"])
@@ -60,10 +60,10 @@ export function registerEngagementTools(
   );
 
   server.tool(
-    "comment_on_post",
-    "Comment on a LinkedIn post from your watchlist. Requires the post ID from get_posts results.",
+    "comment_on_watchlist_post",
+    "Comment on a LinkedIn post that came from one of your OutX watchlists. Takes an OutX `post_id` (from `get_posts` results). To comment on a post by its LinkedIn activity URN directly without a watchlist, use `comment_on_linkedin_post` instead.",
     {
-      post_id: z.string().describe("Post ID from get_posts results"),
+      post_id: z.string().describe("OutX post ID, from get_posts results"),
       user_email: z.string().describe("Email of the LinkedIn account to comment from"),
       comment_text: z.string().describe("The comment text to post"),
       actor_type: z

@@ -14,37 +14,60 @@ export function registerWatchlistTools(
 
   server.tool(
     "create_keyword_watchlist",
-    "Create a watchlist that monitors LinkedIn posts matching keywords. Posts appear after the first scan cycle.",
+    "Create a watchlist that monitors LinkedIn posts matching keywords. Two modes: provide `keywords` to track exact terms, OR provide `prompt` to have OutX generate keywords and intent labels from a plain-English description. Pass one or the other, not both.",
     {
       keywords: z
         .array(z.string())
-        .min(1)
-        .describe("Keywords to track (e.g. ['AI startup funding', 'series A'])"),
+        .optional()
+        .describe(
+          "Direct mode. Keywords to track (e.g. ['AI startup funding', 'series A']). Mutually exclusive with `prompt`."
+        ),
       required_keywords: z
         .array(z.string())
         .optional()
-        .describe("Posts MUST contain at least one of these words"),
+        .describe("Direct mode only. Applied to every keyword. Posts MUST contain at least one of these words."),
       exclude_keywords: z
         .array(z.string())
         .optional()
-        .describe("Exclude posts containing any of these words"),
-      name: z.string().optional().describe("Watchlist name"),
-      description: z.string().optional(),
-      labels: z.array(z.string()).optional().describe("Custom labels for categorization"),
+        .describe("Direct mode only. Applied to every keyword. Posts containing any of these are excluded."),
+      prompt: z
+        .string()
+        .optional()
+        .describe(
+          "AI mode. Plain-English description of what to track (e.g. 'People looking for remote software engineering jobs'). OutX generates keywords and intent labels in the background. Mutually exclusive with `keywords`."
+        ),
+      name: z.string().optional().describe("Watchlist name. Auto-generated if omitted."),
+      description: z.string().optional().describe("Direct mode only. Optional description for the watchlist."),
+      labels: z.array(z.string()).optional().describe("Direct mode only. Custom labels for categorization."),
       fetchFreqInHours: fetchFreqEnum.optional(),
     },
     async (params) => {
-      const body: Record<string, unknown> = {
-        keywords: params.keywords.map((kw) => {
+      const hasKeywords = Array.isArray(params.keywords) && params.keywords.length > 0;
+      const hasPrompt = typeof params.prompt === "string" && params.prompt.trim().length > 0;
+
+      if (hasKeywords && hasPrompt) {
+        throw new Error("Provide either `keywords` or `prompt`, not both.");
+      }
+      if (!hasKeywords && !hasPrompt) {
+        throw new Error("Provide either `keywords` (array) or `prompt` (string).");
+      }
+
+      const body: Record<string, unknown> = {};
+
+      if (hasPrompt) {
+        body.prompt = params.prompt!.trim();
+      } else {
+        body.keywords = params.keywords!.map((kw) => {
           const obj: Record<string, unknown> = { keyword: kw };
           if (params.required_keywords) obj.required_keywords = params.required_keywords;
           if (params.exclude_keywords) obj.exclude_keywords = params.exclude_keywords;
           return obj;
-        }),
-      };
+        });
+        if (params.description) body.description = params.description;
+        if (params.labels) body.labels = params.labels;
+      }
+
       if (params.name) body.name = params.name;
-      if (params.description) body.description = params.description;
-      if (params.labels) body.labels = params.labels;
       if (params.fetchFreqInHours)
         body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
 
@@ -65,7 +88,7 @@ export function registerWatchlistTools(
 
   server.tool(
     "update_keyword_watchlist",
-    "Update a keyword watchlist. Can change name, fetch frequency, Slack webhook, pause/resume tracking via `disable`, and replace the tracked keywords or labels.",
+    "Update a keyword watchlist. Patch any fields (name, fetchFreqInHours, disable, slack_webhook_url, keywords, labels), OR pass `prompt` to have OutX regenerate keywords and labels from a new description. Patch and prompt modes are mutually exclusive.",
     {
       id: z.string().describe("Watchlist ID"),
       name: z.string().optional(),
@@ -83,38 +106,64 @@ export function registerWatchlistTools(
         .array(z.string())
         .optional()
         .describe(
-          "Replace tracked keywords. All existing keywords are removed and these are inserted."
+          "Patch mode. Replace tracked keywords; all existing keywords are removed and these are inserted. Mutually exclusive with `prompt`."
         ),
       required_keywords: z
         .array(z.string())
         .optional()
-        .describe("Applied to every keyword above. Posts MUST contain at least one."),
+        .describe("Patch mode only. Applied to every keyword above. Posts MUST contain at least one."),
       exclude_keywords: z
         .array(z.string())
         .optional()
-        .describe("Applied to every keyword above. Posts containing any are excluded."),
+        .describe("Patch mode only. Applied to every keyword above. Posts containing any are excluded."),
       labels: z
         .array(z.string())
         .optional()
-        .describe("Replace label set used to categorize matched posts."),
+        .describe("Patch mode only. Replace label set used to categorize matched posts."),
+      prompt: z
+        .string()
+        .optional()
+        .describe(
+          "Regenerate mode. New plain-English prompt. OutX wipes the existing keywords and labels and regenerates them in the background. Mutually exclusive with patch fields above (other than `id`)."
+        ),
     },
     async (params) => {
-      const body: Record<string, unknown> = { id: params.id };
-      if (params.name) body.name = params.name;
-      if (params.fetchFreqInHours)
-        body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
-      if (params.disable !== undefined) body.disable = params.disable;
-      if (params.slack_webhook_url !== undefined)
-        body.slack_webhook_url = params.slack_webhook_url;
-      if (params.keywords) {
-        body.keywords = params.keywords.map((kw) => {
-          const obj: Record<string, unknown> = { keyword: kw };
-          if (params.required_keywords) obj.required_keywords = params.required_keywords;
-          if (params.exclude_keywords) obj.exclude_keywords = params.exclude_keywords;
-          return obj;
-        });
+      const hasPrompt = typeof params.prompt === "string" && params.prompt.trim().length > 0;
+      const hasPatch =
+        params.name !== undefined ||
+        params.fetchFreqInHours !== undefined ||
+        params.disable !== undefined ||
+        params.slack_webhook_url !== undefined ||
+        params.keywords !== undefined ||
+        params.labels !== undefined;
+
+      if (hasPrompt && hasPatch) {
+        throw new Error(
+          "Provide either patch fields (name, fetchFreqInHours, disable, slack_webhook_url, keywords, labels) or `prompt` for regeneration, not both."
+        );
       }
-      if (params.labels) body.labels = params.labels;
+
+      const body: Record<string, unknown> = { id: params.id };
+
+      if (hasPrompt) {
+        body.prompt = params.prompt!.trim();
+      } else {
+        if (params.name) body.name = params.name;
+        if (params.fetchFreqInHours)
+          body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
+        if (params.disable !== undefined) body.disable = params.disable;
+        if (params.slack_webhook_url !== undefined)
+          body.slack_webhook_url = params.slack_webhook_url;
+        if (params.keywords) {
+          body.keywords = params.keywords.map((kw) => {
+            const obj: Record<string, unknown> = { keyword: kw };
+            if (params.required_keywords) obj.required_keywords = params.required_keywords;
+            if (params.exclude_keywords) obj.exclude_keywords = params.exclude_keywords;
+            return obj;
+          });
+        }
+        if (params.labels) body.labels = params.labels;
+      }
 
       const result = await client.put("/api-keyword-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
@@ -131,49 +180,6 @@ export function registerWatchlistTools(
       const result = await client.delete("/api-keyword-watchlist", {
         id: params.id,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
-    }
-  );
-
-  server.tool(
-    "create_keyword_watchlist_from_prompt",
-    "Create a keyword watchlist from a natural-language prompt. OutX generates optimized keywords and intent labels automatically using AI. The watchlist is created immediately; keyword generation runs in the background. Hits the same endpoint as create_keyword_watchlist with a different body shape (prompt instead of keywords).",
-    {
-      prompt: z
-        .string()
-        .describe(
-          "Plain English description of what to track (e.g. 'People looking for remote software engineering jobs'). Can include URLs for better keyword quality."
-        ),
-      name: z.string().optional().describe("Watchlist name (auto-generated if omitted)"),
-      fetchFreqInHours: fetchFreqEnum.optional(),
-    },
-    async (params) => {
-      const body: Record<string, unknown> = { prompt: params.prompt };
-      if (params.name) body.name = params.name;
-      if (params.fetchFreqInHours)
-        body.fetchFreqInHours = parseInt(params.fetchFreqInHours);
-
-      const result = await client.post("/api-keyword-watchlist", body);
-      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
-    }
-  );
-
-  server.tool(
-    "regenerate_keyword_watchlist_from_prompt",
-    "Replace the prompt on an existing keyword watchlist. OutX wipes the current keywords and labels and regenerates them from the new prompt. Regeneration runs in the background. Hits the same endpoint as update_keyword_watchlist with a prompt body.",
-    {
-      id: z.string().describe("Watchlist ID to update"),
-      prompt: z
-        .string()
-        .describe("New natural-language prompt. OutX will regenerate keywords and labels from this."),
-    },
-    async (params) => {
-      const body: Record<string, unknown> = {
-        id: params.id,
-        prompt: params.prompt,
-      };
-
-      const result = await client.put("/api-keyword-watchlist", body);
       return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
     }
   );

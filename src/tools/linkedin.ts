@@ -25,8 +25,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "fetch_linkedin_posts",
-    "Fetch recent posts from LinkedIn profiles by URN. Use fetch_linkedin_profile first to get the profile URN. Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "fetch_linkedin_profile_posts",
+    "Fetch recent posts from one or more LinkedIn profiles by URN. Use fetch_linkedin_profile first to get the profile URN. Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
     {
       profile_urns: z
         .array(z.string())
@@ -45,8 +45,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "linkedin_like_post",
-    "Like a LinkedIn post by its activity URN. This uses the LinkedIn Data API (direct LinkedIn action). Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "like_linkedin_post",
+    "Like a LinkedIn post by its activity URN (direct LinkedIn action). Use this when you have a `social_urn` and don't need a watchlist. For liking a post that came from one of your watchlists (using its OutX `post_id`), use `like_watchlist_post` instead. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
       social_urn: z
         .string()
@@ -63,8 +63,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "linkedin_comment_on_post",
-    "Comment on a LinkedIn post by its activity URN. This uses the LinkedIn Data API (direct LinkedIn action). Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "comment_on_linkedin_post",
+    "Comment on a LinkedIn post by its activity URN (direct LinkedIn action). Use this when you have a `social_urn` and don't need a watchlist. For commenting on a post that came from one of your watchlists (using its OutX `post_id`), use `comment_on_watchlist_post` instead. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
       social_urn: z
         .string()
@@ -119,8 +119,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "linkedin_send_message",
-    "Send a LinkedIn direct message to a 1st-degree connection. Requires the recipient's person URN (get it from fetch_linkedin_profile or linkedin_search_profiles). Message is sent from your team's oldest admin member's LinkedIn account. Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "send_linkedin_message",
+    "Send a LinkedIn direct message to a 1st-degree connection. Requires the recipient's person URN (get it from fetch_linkedin_profile or search_linkedin_profiles). Message is sent from your team's oldest admin member's LinkedIn account. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
       recipient_urn: z
         .string()
@@ -141,8 +141,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "linkedin_search_profiles",
-    "Search LinkedIn profiles by keywords, title, company, location, industry, and more. Returns matching profiles with name, headline, location, profile slug, and connection degree. At least one filter is required. Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "search_linkedin_profiles",
+    "Search LinkedIn profiles by keywords, title, company, location, industry, and more. Returns matching profiles with name, headline, location, profile slug, and connection degree. At least one filter is required. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
       keywords: z.string().optional().describe("General keyword search across name, headline, and profile text"),
       title: z.string().optional().describe("Filter by job title (e.g. 'VP of Engineering')"),
@@ -182,8 +182,8 @@ export function registerLinkedInTools(
   );
 
   server.tool(
-    "linkedin_fetch_connections",
-    "Fetch your 1st-degree LinkedIn connections. Optionally filter by keyword, sort by recently added, and paginate. Connections are from your team's oldest admin member's LinkedIn account. Requires the OutX Chrome extension to be active. This tool handles async polling automatically.",
+    "fetch_linkedin_connections",
+    "Fetch your 1st-degree LinkedIn connections. Optionally filter by keyword, sort by recently added, and paginate. Connections are from your team's oldest admin member's LinkedIn account. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
       keyword: z.string().optional().describe("Filter connections by name (e.g. 'John')"),
       sort_type: z.string().optional().describe("Sort order. Pass 'RECENTLY_ADDED' for newest first"),
@@ -208,9 +208,9 @@ export function registerLinkedInTools(
 
   server.tool(
     "get_task_status",
-    "Check the status of an async LinkedIn Data API task. Use this to manually check tasks that timed out. Status values: pending, processing, completed, failed.",
+    "Recovery tool. Every other LinkedIn Data API tool polls automatically for ~150 seconds and returns the result directly, so you almost never need this. Use it ONLY when another tool returns a 'did not complete within 150s' error: pass the `api_agent_task_id` from that error message to check whether the task has since finished. Calling the original tool again would create a duplicate task and consume another LinkedIn-side daily quota slot. Status values: pending, processing, completed, failed.",
     {
-      task_id: z.string().describe("The api_agent_task_id to check"),
+      task_id: z.string().describe("The `api_agent_task_id` from the timeout error message of another LinkedIn Data tool."),
     },
     async (params) => {
       const result = await client.get("/linkedin-agent/get-task-status", {
