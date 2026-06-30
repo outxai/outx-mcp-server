@@ -73,6 +73,12 @@ export function registerWatchlistTools(
         ),
       name: z.string().optional().describe("Watchlist name. Auto-generated if omitted."),
       description: z.string().optional().describe("Direct mode only. Optional description for the watchlist."),
+      objective: z
+        .string()
+        .optional()
+        .describe(
+          "Direct mode only. One-sentence objective (who/what you want to find and why). Drives the relevance-scoring vector so direct-mode lists rank like prompt-built ones. Omit and the list ranks only by keyword match."
+        ),
       labels: z
         .array(labelSchema)
         .optional()
@@ -104,6 +110,7 @@ export function registerWatchlistTools(
           return obj;
         });
         if (params.description) body.description = params.description;
+        if (params.objective) body.objective = params.objective;
         if (params.labels) body.labels = toApiLabels(params.labels);
       }
 
