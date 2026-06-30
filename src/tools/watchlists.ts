@@ -6,6 +6,41 @@ const fetchFreqEnum = z
   .enum(["1", "3", "6", "12", "24", "48", "72"])
   .describe("How often to scan for new posts (hours)");
 
+// A label (intent category) is either a bare name string, or an object with an
+// optional `default` flag that controls whether the label shows in the feed by
+// default. At most 2 labels may be default-true; the API caps any extras to false.
+// `key` is accepted as an alias for `name` so a label object returned by a GET
+// (which uses `key`) can be passed straight back on update.
+const labelSchema = z.union([
+  z.string(),
+  z.object({
+    name: z.string().optional().describe("Label name (use for new labels)"),
+    key: z
+      .string()
+      .optional()
+      .describe("Alias for `name`; the value GET returns, so a label from a GET can be sent back unchanged"),
+    description: z.string().optional().describe("What this label represents"),
+    default: z
+      .boolean()
+      .optional()
+      .describe(
+        "Show this label in the feed by default. At most 2 labels may be true; extras are capped to false."
+      ),
+  }),
+]);
+
+type LabelParam =
+  | string
+  | { name?: string; key?: string; description?: string; default?: boolean };
+
+// Normalize to the object array the API expects. A bare string becomes { name },
+// so callers that pass plain label names keep working (and now actually persist).
+function toApiLabels(
+  labels: LabelParam[]
+): Array<{ name?: string; key?: string; description?: string; default?: boolean }> {
+  return labels.map((l) => (typeof l === "string" ? { name: l } : l));
+}
+
 export function registerWatchlistTools(
   server: McpServer,
   client: OutxClient
@@ -38,7 +73,12 @@ export function registerWatchlistTools(
         ),
       name: z.string().optional().describe("Watchlist name. Auto-generated if omitted."),
       description: z.string().optional().describe("Direct mode only. Optional description for the watchlist."),
-      labels: z.array(z.string()).optional().describe("Direct mode only. Custom labels for categorization."),
+      labels: z
+        .array(labelSchema)
+        .optional()
+        .describe(
+          "Direct mode only. Intent labels for categorization. Each is a name string, or an object {name, description, default} where `default` controls feed visibility (max 2 default-true)."
+        ),
       fetchFreqInHours: fetchFreqEnum.optional(),
     },
     async (params) => {
@@ -64,7 +104,7 @@ export function registerWatchlistTools(
           return obj;
         });
         if (params.description) body.description = params.description;
-        if (params.labels) body.labels = params.labels;
+        if (params.labels) body.labels = toApiLabels(params.labels);
       }
 
       if (params.name) body.name = params.name;
@@ -117,9 +157,11 @@ export function registerWatchlistTools(
         .optional()
         .describe("Patch mode only. Applied to every keyword above. Posts containing any are excluded."),
       labels: z
-        .array(z.string())
+        .array(labelSchema)
         .optional()
-        .describe("Patch mode only. Replace label set used to categorize matched posts."),
+        .describe(
+          "Patch mode only. Replaces the label set. Each is a name string, or an object {name, description, default}. GET the watchlist first to see current labels and their `default` flags so you can preserve them."
+        ),
       prompt: z
         .string()
         .optional()
@@ -162,7 +204,7 @@ export function registerWatchlistTools(
             return obj;
           });
         }
-        if (params.labels) body.labels = params.labels;
+        if (params.labels) body.labels = toApiLabels(params.labels);
       }
 
       const result = await client.put("/api-keyword-watchlist", body);
