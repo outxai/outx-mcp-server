@@ -141,6 +141,31 @@ export function registerLinkedInTools(
   );
 
   server.tool(
+    "send_linkedin_connection_request",
+    "Send a LinkedIn connection request to a profile, with an optional note. Requires the person URN (get it from fetch_linkedin_profile or search_linkedin_profiles). Sent from your team's oldest admin member's LinkedIn account. Requires the OutX Chrome extension to be active. Polls automatically.",
+    {
+      profile_urn: z
+        .string()
+        .describe("LinkedIn person URN to connect with (e.g. 'urn:li:person:ACoAABCDEFG')"),
+      note: z
+        .string()
+        .optional()
+        .describe("Optional connection note (max 300 characters)."),
+    },
+    async (params) => {
+      const body: Record<string, unknown> = { profile_urn: params.profile_urn };
+      if (params.note) body.note = params.note;
+      const response = (await client.post(
+        "/linkedin-agent/send-connection-request",
+        body
+      )) as { api_agent_task_id: string };
+
+      const result = await client.pollTask(response.api_agent_task_id);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    }
+  );
+
+  server.tool(
     "search_linkedin_profiles",
     "Search LinkedIn profiles by keywords, title, company, location, industry, and more. Returns matching profiles with name, headline, location, profile slug, and connection degree. At least one filter is required. Requires the OutX Chrome extension to be active. Polls automatically.",
     {
