@@ -7,6 +7,7 @@ import { registerWatchlistTools } from "./tools/watchlists.js";
 import { registerPostTools } from "./tools/posts.js";
 import { registerEngagementTools } from "./tools/engagement.js";
 import { registerLinkedInTools } from "./tools/linkedin.js";
+import { registerAccountTools } from "./tools/account.js";
 
 const apiKey = process.env.OUTX_API_KEY;
 if (!apiKey) {
@@ -21,13 +22,14 @@ const client = new OutxClient(apiKey);
 
 const server = new McpServer({
   name: "outx",
-  version: "1.5.0",
+  version: "1.6.0",
 });
 
 registerWatchlistTools(server, client);
 registerPostTools(server, client);
 registerEngagementTools(server, client);
 registerLinkedInTools(server, client);
+registerAccountTools(server, client);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
