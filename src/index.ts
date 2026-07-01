@@ -22,7 +22,7 @@ const client = new OutxClient(apiKey);
 
 const server = new McpServer({
   name: "outx",
-  version: "1.6.0",
+  version: "1.7.0",
 });
 
 registerWatchlistTools(server, client);

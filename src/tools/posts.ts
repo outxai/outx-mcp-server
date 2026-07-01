@@ -13,9 +13,9 @@ export function registerPostTools(
       watchlist_id: z.string().optional().describe("Filter by watchlist ID (omit for all)"),
       search_term: z.string().optional().describe("Search within post content"),
       sort_by: z
-        .enum(["recent_first", "oldest_first", "engagement"])
+        .enum(["recent", "popular_first", "engagement", "relevance_first"])
         .optional()
-        .describe("Sort order (default: recent_first)"),
+        .describe("Sort order (default: recent)"),
       page: z.string().optional().describe("Page number (default: 1)"),
       start_date: z.string().optional().describe("Filter posts after this date (ISO 8601)"),
       end_date: z.string().optional().describe("Filter posts before this date (ISO 8601)"),
